@@ -1,0 +1,25 @@
+name: Generate new footprint release package
+
+on:
+  push:
+    tags:
+      - "v*.*.*"
+
+jobs:
+  release:
+    name: build and release
+    runs-on: ubuntu-latest
+    steps:
+      - name: build
+        uses: ./.github/workflows/build.yml
+      - name: Create archive
+        run: |
+          cp LICENSE README.md generated/
+          cd generated/
+          tar czfv "cutie-lib-${GITHUB_REF#refs/*/}.tar.gz" *
+
+      - name: Release
+        uses: softprops/action-gh-release@v2
+        if: startsWith(github.ref, 'refs/tags/')
+        with:
+          files: "generated/*.tar.gz"
