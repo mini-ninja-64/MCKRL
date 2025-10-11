@@ -114,10 +114,10 @@ def compute_all_definitions(definition_dict: dict, base_dict: dict = {}) -> list
 
 @click.command()
 @click.option(
-    "--definitions-dir", "-d", "definitionsDirectory", required=True, type=str
+    "--definitions-dir", "-d", "definitions_directory", required=True, type=str
 )
-@click.option("--generators-dir", "-g", "generatorsDirectory", required=True, type=str)
-@click.option("--output-dir", "-o", "outputDirectory", required=True, type=str)
+@click.option("--generators-dir", "-g", "generators_directory", required=True, type=str)
+@click.option("--output-dir", "-o", "output_directory", required=True, type=str)
 @click.option(
     "--log-level",
     "-L",
