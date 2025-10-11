@@ -1,0 +1,29 @@
+generator: footprints/keyswitch/generate.py
+
+defaults:
+  prefix: Cherry_MX1A
+  switch_type: cherry
+
+combinations:
+  - spacing:
+      - 19.00mm
+      - 19.05mm
+    led:
+      - true
+      - false
+
+  - spacing:
+      - 19.00mm
+      - 19.05mm
+    diode:
+      - true
+
+inputs:
+  - width: 1u
+  - width: 1.25u
+  - width: 1.5u
+  - width: 1.75u
+
+  - width: 1.75u
+    prefix: Cherry_MX1A_stepped
+    switch_horizontal_offset: -4.7625mm # Relative offset (0.25u) can theoretically lead to misaligned keycaps in 19.00mm spacing so using the precise mm measurement

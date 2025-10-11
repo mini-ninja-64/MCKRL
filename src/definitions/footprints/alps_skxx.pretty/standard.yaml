@@ -1,0 +1,23 @@
+generator: footprints/keyswitch/generate.py
+
+defaults:
+  prefix: Alps_SKxx
+  switch_type: alps
+
+combinations:
+  - spacing:
+      - 19.05mm
+    led:
+      - true
+      - false
+
+inputs:
+  - width: 1u
+  - width: 1.25u
+  - width: 1.5u
+  - width: 1.75u
+  - width: 2u
+  - width: 2.25u
+  - width: 2.75u
+  - width: 6.25u
+  - width: 7u

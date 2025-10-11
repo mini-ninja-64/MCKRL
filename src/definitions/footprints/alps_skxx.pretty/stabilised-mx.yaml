@@ -1,0 +1,35 @@
+generator: footprints/keyswitch/generate.py
+
+defaults:
+  prefix: Alps_SKxx_Stabilised_MX
+  switch_type: alps
+  stabiliser_type: cherry
+
+combinations:
+  - stabiliser_rotation:
+      - 0
+      - 180
+    spacing:
+      - 19.05mm
+    led:
+      - true
+      - false
+
+inputs:
+  - width: 2u
+    stabiliser_size: 2u
+
+  - width: 2.25u
+    stabiliser_size: 2u
+
+  - width: 2.75u
+    stabiliser_size: 2u
+
+  - width: 6u
+    stabiliser_size: 6u
+
+  - width: 6.25u
+    stabiliser_size: 6.25u
+
+  - width: 7u
+    stabiliser_size: 7u

@@ -1,0 +1,30 @@
+generator: footprints/keyswitch/generate.py
+
+defaults:
+  prefix: Cherry_MX1A
+  switch_type: cherry
+  stabiliser_type: cherry
+
+combinations:
+  - stabiliser_rotation:
+      - 90
+      - 270
+    spacing:
+      - 19.00mm
+      - 19.05mm
+    led:
+      - true
+      - false
+
+  - stabiliser_rotation:
+      - 90
+      - 270
+    spacing:
+      - 19.00mm
+      - 19.05mm
+    diode:
+      - true
+
+inputs:
+  - width: 2u
+    stabiliser_size: 2u

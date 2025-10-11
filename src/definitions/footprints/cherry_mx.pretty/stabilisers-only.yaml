@@ -1,0 +1,54 @@
+generator: footprints/keyswitch/generate.py
+
+defaults:
+  prefix: Cherry_G99
+  switch_type: null
+  stabiliser_type: cherry
+
+combinations:
+  - spacing:
+      - 19.00mm
+      - 19.05mm
+
+inputs:
+  - prefix: Cherry_G99-0742
+    width: 2u
+    stabiliser_size: 2u
+
+  - prefix: Cherry_G99-0742
+    width: 2.25u
+    stabiliser_size: 2u
+
+  - prefix: Cherry_G99-0742
+    width: 2.75u
+    stabiliser_size: 2u
+
+  - prefix: Cherry_G99-0743
+    width: 3u
+    stabiliser_size: 3u
+
+  - width: 6u
+    stabiliser_size: 6u
+
+  - prefix: Cherry_G99-Signature-Plastics
+    width: 6u
+    stabiliser_size: 5u
+
+  - width: 6.25u
+    stabiliser_size: 6.25u
+
+  - prefix: Cherry_G99-0745
+    width: 7u
+    stabiliser_size: 7u
+
+  - prefix: Cherry_G99-0744
+    width: 8u
+    stabiliser_size: 8u
+
+  - prefix: Cherry_G99-0744
+    width: 9u
+    stabiliser_size: 8u
+
+  - prefix: Cherry_G99-0744
+    width: 10u
+    stabiliser_size: 8u

@@ -1,0 +1,19 @@
+[project]
+name = "cutie-lib-v2"
+version = "0.1.0"
+requires-python = ">=3.13"
+dependencies = [
+    "click>=8.3.0",
+    "jsonschema>=4.25.1",
+    "kicad-footprint-generator",
+    "pyyaml>=6.0.3",
+]
+
+[dependency-groups]
+dev = [
+    "autopep8>=2.3.2",
+]
+
+[tool.uv.sources]
+kicad-footprint-generator = { git = "https://gitlab.com/kicad/libraries/kicad-footprint-generator.git" }
+
