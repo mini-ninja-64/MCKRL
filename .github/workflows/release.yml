@@ -9,10 +9,8 @@ jobs:
   release:
     name: build and release
     runs-on: ubuntu-latest
+    uses: mini-ninja-64/MCKRL/.github/workflows/build.yml@main
     steps:
-      - name: build
-        uses: mini-ninja-64/MCKRL/.github/workflows/build.yml@main
-
       - name: Create archive
         run: |
           cp LICENSE README.md generated/
