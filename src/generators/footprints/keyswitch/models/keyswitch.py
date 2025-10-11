@@ -1,4 +1,4 @@
-# SPDX-License-Identifier: GPL-3.0-or-later
+# SPDX-License-Identifier: Apache-2.0
 
 from abc import ABCMeta, abstractmethod
 from KicadModTree import Footprint, Vector2D

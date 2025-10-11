@@ -1,4 +1,4 @@
-# SPDX-License-Identifier: GPL-3.0-or-later
+# SPDX-License-Identifier: Apache-2.0
 
 from .keyswitch import Keyswitch  # noqa: F401 This module is generated dynamically
 from .stabiliser import Stabiliser  # noqa: F401 This module is generated dynamically
