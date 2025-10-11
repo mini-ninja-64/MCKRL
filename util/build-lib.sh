@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+set -e
+
 SCRIPT_PATH="$(realpath -s "$0")"
 SOURCE_DIR="$(dirname "$SCRIPT_PATH")/../src"
 
