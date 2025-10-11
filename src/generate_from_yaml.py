@@ -121,7 +121,7 @@ def compute_all_definitions(definition_dict: dict, base_dict: dict = {}) -> list
 @click.option(
     "--log-level",
     "-L",
-    "logLevel",
+    "log_level",
     required=False,
     type=click.Choice(logging._nameToLevel.keys(), case_sensitive=False),
 )
