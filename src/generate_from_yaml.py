@@ -106,7 +106,10 @@ def compute_all_definitions(definition_dict: dict, base_dict: dict = {}) -> list
     for definition_input in definition_inputs:
         for definition_combination in definition_combinations:
             definitions.append(
-                base_dict | definition_default | definition_combination | definition_input
+                base_dict
+                | definition_default
+                | definition_combination
+                | definition_input
             )
 
     return definitions
@@ -156,13 +159,17 @@ def generate_kicad_objects(
             module_name = str(module_path).replace("/", ".")
             module = load_python_module_from_file(module_name, generator_file)
 
-            yaml_path_relative_to_definitions = yaml_path.relative_to(definitions_directory)
+            yaml_path_relative_to_definitions = yaml_path.relative_to(
+                definitions_directory
+            )
             output_directory_for_yaml_generated_resources = Path(
                 os.path.realpath(output_directory)
                 + "/"
                 + str(yaml_path_relative_to_definitions.parent)
             )
-            output_directory_for_yaml_generated_resources.mkdir(parents=True, exist_ok=True)
+            output_directory_for_yaml_generated_resources.mkdir(
+                parents=True, exist_ok=True
+            )
 
             base_dict = {"output_dir": output_directory_for_yaml_generated_resources}
             definitions = compute_all_definitions(definition_dict, base_dict)

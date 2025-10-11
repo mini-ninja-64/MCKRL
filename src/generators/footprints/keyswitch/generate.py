@@ -126,6 +126,7 @@ def generate(
         switch_spacing_mm,
         spacing_box_rotation,
     )
+    print(f"{footprint_name} - {spacing_box_rotation}")
     common.add_footprint_labels(keyswitch_footprint, switch_spacing_mm)
 
     file_handler = KicadFileHandler(keyswitch_footprint)

@@ -186,14 +186,12 @@ def add_tht_hole(
 def add_spacing_rectangle(
     footprint: Footprint, width: float, spacing: float, rotation: float
 ):
-    footprint.append(
-        RectLine(
-            start=[-width / 2, -spacing / 2],
-            end=[width / 2, spacing / 2],
-            layer="Dwgs.User",
-            angle=rotation,
-        )
+    rect_line = RectLine(
+        start=[-width / 2, -spacing / 2],
+        end=[width / 2, spacing / 2],
+        layer="Dwgs.User",
     )
+    footprint.append(rect_line.rotate(rotation))
 
 
 def is_vowel(char: str):

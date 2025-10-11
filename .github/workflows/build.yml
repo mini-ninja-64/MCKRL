@@ -17,8 +17,8 @@ jobs:
       - name: Setup python dependencies
         run: uv sync
 
-      - name: Check formatting
-        run: uv run ruff check
+      - name: Check formatting & linting
+        run: uv run ruff format --check && uv run ruff check
 
       - name: Generate footprints
         run: ./util/build-lib.sh
