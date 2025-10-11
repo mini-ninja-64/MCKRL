@@ -10,10 +10,9 @@ jobs:
     name: build and release
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
-        uses: actions/checkout@v5
       - name: build
-        uses: ./.github/workflows/build.yml
+        uses: mini-ninja-64/MCKRL/.github/workflows/build.yml@main
+
       - name: Create archive
         run: |
           cp LICENSE README.md generated/
