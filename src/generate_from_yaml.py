@@ -1,6 +1,6 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 
-import importlib
+import importlib.util
 import logging
 import click
 import yaml
@@ -37,68 +37,76 @@ DEFINITION_SCHEMA: Final[dict] = {
 }
 
 
-def isYamlFile(file: Path):
+def is_yaml_file(file: Path):
     return file.suffix.lower() in VALID_YAML_SUFFIXES
 
 
 # TODO: The terms combination & combination set can be confusing and as such should be renamed
 #       The "combinations" block in our yaml files, contain multiple "combination sets" which
 #       are evaluated independently for all possible combinations and then combined
-def getCombinationsForCombinationSet(
-    combination_set: dict[str, list]
+def get_combinations_for_combination_set(
+    combination_set: dict[str, list],
 ) -> list[dict[str, Any]]:
     if len(combination_set) == 0:
         return []
-    allCombinations = [{}]
+    all_combinations = [{}]
     for key, values in combination_set.items():
         combinations = []
         for value in values:
 
-            def combinationCreator(combination):
+            def combination_creator(combination):
                 return {**combination, key: value}
 
-            combinations.extend(map(combinationCreator, allCombinations))
-        allCombinations = combinations
-    return allCombinations
+            combinations.extend(map(combination_creator, all_combinations))
+        all_combinations = combinations
+    return all_combinations
 
 
-def getCombinations(combinations: list[dict[str, list]]) -> list[dict[str, Any]]:
+def get_combinations(combinations: list[dict[str, list]]) -> list[dict[str, Any]]:
     all_combinations = []
     for combination_set in combinations:
-        all_combinations += getCombinationsForCombinationSet(combination_set)
+        all_combinations += get_combinations_for_combination_set(combination_set)
 
     return all_combinations
 
 
-def getPathInRelativeDirectory(relativeDir, path) -> Path:
-    realDir = os.path.realpath(relativeDir)
-    path = realDir + "/" + path
+def get_path_in_relative_directory(relative_dir, path) -> Path:
+    real_dir = os.path.realpath(relative_dir)
+    path = real_dir + "/" + path
     return Path(path)
 
 
-def loadPythonModuleFromFile(moduleName: str, path: Path):
-    moduleSpec = importlib.util.spec_from_file_location(moduleName, path)
-    module = importlib.util.module_from_spec(moduleSpec)
-    moduleSpec.loader.exec_module(module)
+def load_python_module_from_file(module_name: str, path: Path):
+    module_spec = importlib.util.spec_from_file_location(module_name, path)
+    if module_spec is None:
+        raise RuntimeError(
+            "ModuleSpec could not be generated for module '{moduleName}' at path '{path}'"
+        )
+    module = importlib.util.module_from_spec(module_spec)
+    if module_spec.loader is None:
+        raise RuntimeError(
+            "Generated ModuleSpec has no loader for module '{moduleName}' at path '{path}'"
+        )
+    module_spec.loader.exec_module(module)
 
     return module
 
 
-def computeAllDefinitions(definitionDict: dict, baseDict: dict = {}) -> list[dict]:
-    definitionDefault = definitionDict.get("defaults", {})
-    definitionCombinations = getCombinations(definitionDict.get("combinations", []))
-    definitionInputs = definitionDict["inputs"]
+def compute_all_definitions(definition_dict: dict, base_dict: dict = {}) -> list[dict]:
+    definition_default = definition_dict.get("defaults", {})
+    definition_combinations = get_combinations(definition_dict.get("combinations", []))
+    definition_inputs = definition_dict["inputs"]
 
     # Create a dummy empty combination to keep our loop simple
-    if len(definitionCombinations) == 0:
-        definitionCombinations = [{}]
+    if len(definition_combinations) == 0:
+        definition_combinations = [{}]
 
     definitions = []
 
-    for definitionInput in definitionInputs:
-        for definitionCombination in definitionCombinations:
+    for definition_input in definition_inputs:
+        for definition_combination in definition_combinations:
             definitions.append(
-                baseDict | definitionDefault | definitionCombination | definitionInput
+                base_dict | definition_default | definition_combination | definition_input
             )
 
     return definitions
@@ -117,52 +125,52 @@ def computeAllDefinitions(definitionDict: dict, baseDict: dict = {}) -> list[dic
     required=False,
     type=click.Choice(logging._nameToLevel.keys(), case_sensitive=False),
 )
-def generateKicadObjects(
-    definitionsDirectory: str,
-    generatorsDirectory: str,
-    outputDirectory: str,
-    logLevel: str,
+def generate_kicad_objects(
+    definitions_directory: str,
+    generators_directory: str,
+    output_directory: str,
+    log_level: str,
 ):
-    if logLevel is not None:
-        logging.getLogger().setLevel(logLevel.upper())
+    if log_level is not None:
+        logging.getLogger().setLevel(log_level.upper())
 
-    filesInDefinitionDir: list[Path] = list(Path(definitionsDirectory).rglob("*.*"))
-    yamlPaths = filter(isYamlFile, filesInDefinitionDir)
+    files_in_definition_dir: list[Path] = list(Path(definitions_directory).rglob("*.*"))
+    yaml_paths = filter(is_yaml_file, files_in_definition_dir)
 
     # TODO: make sure everything is a pathlib Path
-    for yamlPath in yamlPaths:
-        with open(yamlPath) as yamlFile:
-            definitionDict = yaml.load(yamlFile, Loader=SafeLoader)
-            validate(definitionDict, DEFINITION_SCHEMA)
+    for yaml_path in yaml_paths:
+        with open(yaml_path) as yaml_file:
+            definition_dict = yaml.load(yaml_file, Loader=SafeLoader)
+            validate(definition_dict, DEFINITION_SCHEMA)
 
-            generatorFile = getPathInRelativeDirectory(
-                generatorsDirectory, definitionDict["generator"]
+            generator_file = get_path_in_relative_directory(
+                generators_directory, definition_dict["generator"]
             )
 
-            # TODO: forward slashes assume *nix, we should consider Windows
+            # TODO: forward do not work on Windows
             module_path = os.path.splitext(
-                os.path.basename(generatorsDirectory)
+                os.path.basename(generators_directory)
                 + "/"
-                + os.path.relpath(generatorFile, generatorsDirectory)
+                + os.path.relpath(generator_file, generators_directory)
             )[0]
             module_name = str(module_path).replace("/", ".")
-            module = loadPythonModuleFromFile(module_name, generatorFile)
+            module = load_python_module_from_file(module_name, generator_file)
 
-            yamlPathRelativeToDefinitions = yamlPath.relative_to(definitionsDirectory)
-            outputDirectoryForYamlGeneratedResources = Path(
-                os.path.realpath(outputDirectory)
+            yaml_path_relative_to_definitions = yaml_path.relative_to(definitions_directory)
+            output_directory_for_yaml_generated_resources = Path(
+                os.path.realpath(output_directory)
                 + "/"
-                + str(yamlPathRelativeToDefinitions.parent)
+                + str(yaml_path_relative_to_definitions.parent)
             )
-            outputDirectoryForYamlGeneratedResources.mkdir(parents=True, exist_ok=True)
+            output_directory_for_yaml_generated_resources.mkdir(parents=True, exist_ok=True)
 
-            baseDict = {"output_dir": outputDirectoryForYamlGeneratedResources}
-            definitions = computeAllDefinitions(definitionDict, baseDict)
+            base_dict = {"output_dir": output_directory_for_yaml_generated_resources}
+            definitions = compute_all_definitions(definition_dict, base_dict)
 
             logging.info(
                 "Found %i definitions in '%s'",
                 len(definitions),
-                yamlPathRelativeToDefinitions,
+                yaml_path_relative_to_definitions,
             )
 
             for definition in definitions:
@@ -170,4 +178,4 @@ def generateKicadObjects(
 
 
 if __name__ == "__main__":
-    generateKicadObjects()
+    generate_kicad_objects()

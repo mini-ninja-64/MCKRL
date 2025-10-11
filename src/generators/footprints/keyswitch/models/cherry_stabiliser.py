@@ -89,44 +89,44 @@ class CherryStabiliser(Stabiliser):
     def __add_stabiliser_courtyard(self, footprint: Footprint, half_width: float):
         centre_y = self.centre.y + STAB_VERTICAL_OFFSET
         line = PolygonLine(
-                shape=[
-                    [
-                        self.centre.x - half_width - (STAB_WIDTH / 2),
-                        centre_y - (STAB_HEIGHT / 2),
-                    ],
-                    [
-                        self.centre.x - half_width + (STAB_WIDTH / 2),
-                        centre_y - (STAB_HEIGHT / 2),
-                    ],
-                    [
-                        self.centre.x - half_width + (STAB_WIDTH / 2),
-                        (centre_y + (STAB_HEIGHT / 2)) - STAB_WIRE_BUFFER,
-                    ],
-                    [
-                        self.centre.x + half_width - (STAB_WIDTH / 2),
-                        (centre_y + (STAB_HEIGHT / 2)) - STAB_WIRE_BUFFER,
-                    ],
-                    [
-                        self.centre.x + half_width - (STAB_WIDTH / 2),
-                        centre_y - (STAB_HEIGHT / 2),
-                    ],
-                    [
-                        self.centre.x + half_width + (STAB_WIDTH / 2),
-                        centre_y - (STAB_HEIGHT / 2),
-                    ],
-                    [
-                        self.centre.x + half_width + (STAB_WIDTH / 2),
-                        centre_y + (STAB_HEIGHT / 2),
-                    ],
-                    [
-                        self.centre.x - half_width - (STAB_WIDTH / 2),
-                        centre_y + (STAB_HEIGHT / 2),
-                    ],
-                    [
-                        self.centre.x - half_width - (STAB_WIDTH / 2),
-                        centre_y - (STAB_HEIGHT / 2),
-                    ],
+            shape=[
+                [
+                    self.centre.x - half_width - (STAB_WIDTH / 2),
+                    centre_y - (STAB_HEIGHT / 2),
                 ],
-                layer="F.CrtYd"
-            )
-        footprint.append(line.rotate(origin=self.centre,angle=self.rotation))
+                [
+                    self.centre.x - half_width + (STAB_WIDTH / 2),
+                    centre_y - (STAB_HEIGHT / 2),
+                ],
+                [
+                    self.centre.x - half_width + (STAB_WIDTH / 2),
+                    (centre_y + (STAB_HEIGHT / 2)) - STAB_WIRE_BUFFER,
+                ],
+                [
+                    self.centre.x + half_width - (STAB_WIDTH / 2),
+                    (centre_y + (STAB_HEIGHT / 2)) - STAB_WIRE_BUFFER,
+                ],
+                [
+                    self.centre.x + half_width - (STAB_WIDTH / 2),
+                    centre_y - (STAB_HEIGHT / 2),
+                ],
+                [
+                    self.centre.x + half_width + (STAB_WIDTH / 2),
+                    centre_y - (STAB_HEIGHT / 2),
+                ],
+                [
+                    self.centre.x + half_width + (STAB_WIDTH / 2),
+                    centre_y + (STAB_HEIGHT / 2),
+                ],
+                [
+                    self.centre.x - half_width - (STAB_WIDTH / 2),
+                    centre_y + (STAB_HEIGHT / 2),
+                ],
+                [
+                    self.centre.x - half_width - (STAB_WIDTH / 2),
+                    centre_y - (STAB_HEIGHT / 2),
+                ],
+            ],
+            layer="F.CrtYd",
+        )
+        footprint.append(line.rotate(origin=self.centre, angle=self.rotation))

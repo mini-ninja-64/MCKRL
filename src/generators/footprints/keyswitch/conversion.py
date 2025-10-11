@@ -20,7 +20,7 @@ def string_to_millimetre_float(
 
     for unit_string, unit_multiplier in unit_lookup.items():
         if measurement_string.endswith(unit_string):
-            numberString = measurement_string[: -len(unit_string)]
-            return float(numberString) * unit_multiplier
+            number_string = measurement_string[: -len(unit_string)]
+            return float(number_string) * unit_multiplier
 
     raise ValueError(f"Provided measurement unit not supported: {measurement_string}")

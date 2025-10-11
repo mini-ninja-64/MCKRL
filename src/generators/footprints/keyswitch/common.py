@@ -1,7 +1,16 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 
 from typing import Literal
-from KicadModTree import Footprint, Property, RoundRadiusHandler, Vector2D, Pad, RectLine, Text
+from KicadModTree import (
+    Footprint,
+    Property,
+    RoundRadiusHandler,
+    Vector2D,
+    Pad,
+    RectLine,
+)
+
+from generators.footprints.keyswitch.generate import StabiliserParams
 
 
 def create_footprint_name(
@@ -11,7 +20,7 @@ def create_footprint_name(
     switch_spacing_mm: float,
     width_u: float,
     switch_rotation: float,
-    stabiliser_rotation: float,
+    stabiliser_params: StabiliserParams | None,
 ) -> str:
     switch_accessory = ""
 
@@ -30,9 +39,9 @@ def create_footprint_name(
             string_type="name",
         )
 
-    if stabiliser_rotation != 0:
+    if stabiliser_params is not None and stabiliser_params.rotation != 0:
         name += get_rotation_description(
-            angle=stabiliser_rotation,
+            angle=stabiliser_params.rotation,
             suffix="stab",
             string_type="name",
         )
@@ -44,11 +53,8 @@ def create_footprint_description(
     prefix: str,
     led: bool,
     diode: bool,
-    switch: bool,
     width_u: float,
-    stabiliser_size: str,
-    switch_rotation: float,
-    stabiliser_rotation: float,
+    stabiliser_params: StabiliserParams | None,
 ) -> str:
     manufacturer = prefix.split("_")[0].title()
     product_code = prefix.split("_")[1]
@@ -61,10 +67,6 @@ def create_footprint_description(
         f"{indefinite_article} {manufacturer} {product_code} footprint, {width_u}u wide"
     )
 
-    if switch is False:
-        description += "."
-        return description
-
     extra_info = []
 
     if led:
@@ -72,12 +74,12 @@ def create_footprint_description(
     if diode:
         extra_info.append("an in-switch diode")
 
-    if stabiliser_size is not None:
-        if stabiliser_rotation == 0:
+    if stabiliser_params is not None:
+        if stabiliser_params.rotation == 0:
             extra_info.append("a stabiliser")
         else:
             rotation_description = get_rotation_description(
-                angle=stabiliser_rotation,
+                angle=stabiliser_params.rotation,
                 suffix=None,
                 string_type="description",
             )
@@ -93,7 +95,7 @@ def create_footprint_description(
     return description
 
 
-def add_footprint_labels(footprint: Footprint, spacing: float) -> Footprint:
+def add_footprint_labels(footprint: Footprint, spacing: float):
     footprint.append(
         Property(
             name=Property.VALUE,
@@ -133,9 +135,7 @@ def get_rotation_description(
         return "_{0}-{1}".format("-".join(description_words), suffix)
 
     if string_type == "description":
-        stabiliser_description = " ".join(
-            word.lower() for word in description_words
-        )
+        stabiliser_description = " ".join(word.lower() for word in description_words)
         return " ".join(["a", stabiliser_description, "stabiliser"])
 
 
@@ -151,7 +151,7 @@ def add_npth_hole(
             type=Pad.TYPE_NPTH,
             shape=Pad.SHAPE_CIRCLE,
             at=centre,
-            size=[diameter, diameter],
+            size=Vector2D(diameter, diameter),
             drill=diameter,
             layers=Pad.LAYERS_NPTH,
         ).rotate(angle=rotation, origin=rotation_origin)
@@ -183,7 +183,9 @@ def add_tht_hole(
     )
 
 
-def add_spacing_rectangle(footprint, width, spacing, rotation):
+def add_spacing_rectangle(
+    footprint: Footprint, width: float, spacing: float, rotation: float
+):
     footprint.append(
         RectLine(
             start=[-width / 2, -spacing / 2],
