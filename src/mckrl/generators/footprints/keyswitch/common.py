@@ -10,7 +10,7 @@ from KicadModTree import (
     RectLine,
 )
 
-from generators.footprints.keyswitch.generate import StabiliserParams
+from .types import StabiliserParams
 
 
 def create_footprint_name(

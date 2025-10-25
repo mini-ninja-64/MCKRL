@@ -3,11 +3,11 @@
 set -e
 
 SCRIPT_PATH="$(realpath -s "$0")"
-SOURCE_DIR="$(dirname "$SCRIPT_PATH")/../src"
+SOURCE_DIR="$(dirname "$SCRIPT_PATH")/../src/mckrl"
 
 cd "$SOURCE_DIR" || return 1
 
-PROJECT_DIR="${SOURCE_DIR}/.."
+PROJECT_DIR="${SOURCE_DIR}/../.."
 
 YAML_GENERATOR_SCRIPT="$SOURCE_DIR/generate_from_yaml.py"
 DEFINITIONS_DIR="$PROJECT_DIR/definitions"
