@@ -4,7 +4,7 @@ from pathlib import Path
 
 
 from mckrl.generators.footprints.keyswitch.types import StabiliserParams
-from . import models, conversion, common
+from mckrl.generators.footprints.keyswitch import models, conversion, common
 from KicadModTree import Footprint, FootprintType, Vector2D, KicadFileHandler
 
 

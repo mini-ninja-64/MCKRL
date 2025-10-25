@@ -3,12 +3,14 @@ name = "mckrl"
 version = "0.1.0"
 requires-python = ">=3.13"
 dependencies = [
-    "click>=8.3.0",
     "jsonschema>=4.25.1",
     "kicad-footprint-generator",
+    "loguru>=0.7.3",
     "pydantic>=2.12.0",
     "pyyaml>=6.0.3",
+    "rich>=14.2.0",
     "ruff>=0.14.0",
+    "typer>=0.20.0",
 ]
 
 [tool.uv.sources]
@@ -17,6 +19,7 @@ kicad-footprint-generator = { git = "https://gitlab.com/kicad/libraries/kicad-fo
 [dependency-groups]
 dev = [
     "pytest>=8.4.2",
+    "ruff>=0.14.2",
 ]
 
 [build-system]
@@ -24,4 +27,4 @@ requires = ["uv_build>=0.9.5,<0.10.0"]
 build-backend = "uv_build"
 
 [project.scripts]
-mckrl = "mckrl.generate_from_yaml:generate_kicad_objects"
+mckrl = "mckrl.cli:cli"
