@@ -11,30 +11,9 @@ from pathlib import Path
 from yaml.loader import SafeLoader
 from typing import Any, Final
 
-VALID_YAML_SUFFIXES: Final[list[str]] = [".yaml", ".yml"]
+from mckrl.model import create_validation_model
 
-DEFINITION_SCHEMA: Final[dict] = {
-    "type": "object",
-    "required": ["generator", "inputs"],
-    "properties": {
-        "generator": {"type": "string"},
-        "defaults": {"type": "object"},
-        "combinations": {
-            "type": "array",
-            "items": {
-                "type": "object",
-                "patternProperties": {"^.*$": {"type": "array"}},
-            },
-        },
-        "inputs": {
-            "type": "array",
-            "items": {
-                "type": "object",
-            },
-        },
-    },
-    "additionalProperties": False,
-}
+VALID_YAML_SUFFIXES: Final[list[str]] = [".yaml", ".yml"]
 
 
 def is_yaml_file(file: Path):
@@ -144,7 +123,6 @@ def generate_kicad_objects(
     for yaml_path in yaml_paths:
         with open(yaml_path) as yaml_file:
             definition_dict = yaml.load(yaml_file, Loader=SafeLoader)
-            validate(definition_dict, DEFINITION_SCHEMA)
 
             generator_file = get_path_in_relative_directory(
                 generators_directory, definition_dict["generator"]
@@ -158,6 +136,9 @@ def generate_kicad_objects(
             )[0]
             module_name = str(module_path).replace("/", ".")
             module = load_python_module_from_file(module_name, generator_file)
+
+            model = create_validation_model(module.generate)
+            validate(definition_dict, model.model_json_schema())
 
             yaml_path_relative_to_definitions = yaml_path.relative_to(
                 definitions_directory
