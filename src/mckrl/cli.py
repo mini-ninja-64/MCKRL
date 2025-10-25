@@ -3,6 +3,8 @@
 import importlib.util
 import subprocess
 from loguru import logger
+from rich.logging import RichHandler
+import rich.progress
 import typer
 import yaml
 import os
@@ -13,6 +15,8 @@ from yaml.loader import SafeLoader
 from typing import Annotated, Any, Final
 
 from mckrl.model import create_validation_model
+
+logger.configure(handlers=[{"sink": RichHandler(), "format": "{message}"}])
 
 VALID_YAML_SUFFIXES: Final[list[str]] = [".yaml", ".yml"]
 
@@ -132,9 +136,11 @@ def generate_kicad_objects(
     definitions_directory, generators_directory, output_directory
 ):
     files_in_definition_dir: list[Path] = list(definitions_directory.rglob("*.*"))
-    yaml_paths = filter(is_yaml_file, files_in_definition_dir)
+    yaml_paths = list(filter(is_yaml_file, files_in_definition_dir))
 
-    for yaml_path in yaml_paths:
+    for yaml_path in rich.progress.track(
+        yaml_paths, description="Processing definition files"
+    ):
         with open(yaml_path) as yaml_file:
             definition_dict = yaml.load(yaml_file, Loader=SafeLoader)
 
@@ -168,10 +174,8 @@ def generate_kicad_objects(
             definitions = compute_all_definitions(definition_dict, base_dict)
 
             logger.info(
-                "Found %i definitions in '%s'",
-                len(definitions),
-                yaml_path_relative_to_definitions,
+                f"Found {len(definitions)} definitions in {yaml_path_relative_to_definitions}",
             )
 
-            for definition in definitions:
+            for definition in rich.progress.track(definitions, transient=True):
                 module.generate(**definition)
