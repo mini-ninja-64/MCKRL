@@ -9,14 +9,14 @@ def test_creating_model_for_generator_params():
         pass
 
     model = create_validation_model(generate)
-    empty = model.model_validate(
+    _empty = model.model_validate(
         yaml.safe_load((Path(__file__).parent / "empty.yaml").open())
     )
 
 
 def test_validating_keyswitch_generate_yaml():
     model = create_validation_model(keyswitch.generate)
-    validated = model.model_validate(
+    _validated = model.model_validate(
         yaml.safe_load(
             (
                 Path(__file__).parent.parent.parent
@@ -24,4 +24,3 @@ def test_validating_keyswitch_generate_yaml():
             ).open()
         )
     )
-    ...
