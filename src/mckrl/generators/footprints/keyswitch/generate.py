@@ -2,20 +2,10 @@
 
 from pathlib import Path
 
-import pydantic
-from . import models, conversion, common
+
+from mckrl.generators.footprints.keyswitch.types import StabiliserParams
+from mckrl.generators.footprints.keyswitch import models, conversion, common
 from KicadModTree import Footprint, FootprintType, Vector2D, KicadFileHandler
-
-
-class StabiliserParams(pydantic.BaseModel):
-    type: str
-    size: str
-    rotation: float
-
-    @pydantic.field_validator("rotation")
-    @classmethod
-    def normalize_rotation(cls, v: float):
-        return v % 360
 
 
 def generate(

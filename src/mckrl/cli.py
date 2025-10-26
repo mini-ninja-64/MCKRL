@@ -1,40 +1,24 @@
 # SPDX-License-Identifier: Apache-2.0
 
 import importlib.util
-import logging
-import click
+import subprocess
+from loguru import logger
+from rich.logging import RichHandler
+import rich.progress
+import typer
 import yaml
 import os
 from jsonschema import validate
 
 from pathlib import Path
 from yaml.loader import SafeLoader
-from typing import Any, Final
+from typing import Annotated, Any, Final
+
+from mckrl.model import create_validation_model
+
+logger.configure(handlers=[{"sink": RichHandler(), "format": "{message}"}])
 
 VALID_YAML_SUFFIXES: Final[list[str]] = [".yaml", ".yml"]
-
-DEFINITION_SCHEMA: Final[dict] = {
-    "type": "object",
-    "required": ["generator", "inputs"],
-    "properties": {
-        "generator": {"type": "string"},
-        "defaults": {"type": "object"},
-        "combinations": {
-            "type": "array",
-            "items": {
-                "type": "object",
-                "patternProperties": {"^.*$": {"type": "array"}},
-            },
-        },
-        "inputs": {
-            "type": "array",
-            "items": {
-                "type": "object",
-            },
-        },
-    },
-    "additionalProperties": False,
-}
 
 
 def is_yaml_file(file: Path):
@@ -115,36 +99,50 @@ def compute_all_definitions(definition_dict: dict, base_dict: dict = {}) -> list
     return definitions
 
 
-@click.command()
-@click.option(
-    "--definitions-dir", "-d", "definitions_directory", required=True, type=str
-)
-@click.option("--generators-dir", "-g", "generators_directory", required=True, type=str)
-@click.option("--output-dir", "-o", "output_directory", required=True, type=str)
-@click.option(
-    "--log-level",
-    "-L",
-    "log_level",
-    required=False,
-    type=click.Choice(logging._nameToLevel.keys(), case_sensitive=False),
-)
-def generate_kicad_objects(
-    definitions_directory: str,
-    generators_directory: str,
-    output_directory: str,
-    log_level: str,
+def copy_constants(constants_directory: Path, output_directory: Path):
+    logger.info(f"Clearing output dir: {output_directory}")
+    subprocess.check_call(["rm", "-rf", str(output_directory)])
+    logger.info(
+        f"Copying constant footprints {constants_directory} -> {output_directory}"
+    )
+    subprocess.check_call(["cp", "-r", str(constants_directory), str(output_directory)])
+
+
+cli = typer.Typer(add_completion=False)
+
+
+@cli.command()
+def main(
+    definitions_directory: Annotated[Path, typer.Option("--definitions", "-d")] = Path(
+        "definitions"
+    ),
+    generators_directory: Annotated[
+        Path, typer.Option(..., "--generators", "-g")
+    ] = Path("src/mckrl/generators"),
+    output_directory: Annotated[Path, typer.Option(..., "--output", "-o")] = Path(
+        "generated"
+    ),
+    constants_directory: Annotated[Path, typer.Option(..., "--constants", "-c")] = Path(
+        "constant"
+    ),
 ):
-    if log_level is not None:
-        logging.getLogger().setLevel(log_level.upper())
+    copy_constants(constants_directory, output_directory)
+    generate_kicad_objects(
+        definitions_directory, generators_directory, output_directory
+    )
 
-    files_in_definition_dir: list[Path] = list(Path(definitions_directory).rglob("*.*"))
-    yaml_paths = filter(is_yaml_file, files_in_definition_dir)
 
-    # TODO: make sure everything is a pathlib Path
-    for yaml_path in yaml_paths:
+def generate_kicad_objects(
+    definitions_directory, generators_directory, output_directory
+):
+    files_in_definition_dir: list[Path] = list(definitions_directory.rglob("*.*"))
+    yaml_paths = list(filter(is_yaml_file, files_in_definition_dir))
+
+    for yaml_path in rich.progress.track(
+        yaml_paths, description="Processing definition files"
+    ):
         with open(yaml_path) as yaml_file:
             definition_dict = yaml.load(yaml_file, Loader=SafeLoader)
-            validate(definition_dict, DEFINITION_SCHEMA)
 
             generator_file = get_path_in_relative_directory(
                 generators_directory, definition_dict["generator"]
@@ -159,13 +157,14 @@ def generate_kicad_objects(
             module_name = str(module_path).replace("/", ".")
             module = load_python_module_from_file(module_name, generator_file)
 
+            model = create_validation_model(module.generate)
+            validate(definition_dict, model.model_json_schema())
+
             yaml_path_relative_to_definitions = yaml_path.relative_to(
                 definitions_directory
             )
-            output_directory_for_yaml_generated_resources = Path(
-                os.path.realpath(output_directory)
-                + "/"
-                + str(yaml_path_relative_to_definitions.parent)
+            output_directory_for_yaml_generated_resources = (
+                output_directory.resolve() / yaml_path_relative_to_definitions.parent
             )
             output_directory_for_yaml_generated_resources.mkdir(
                 parents=True, exist_ok=True
@@ -174,15 +173,9 @@ def generate_kicad_objects(
             base_dict = {"output_dir": output_directory_for_yaml_generated_resources}
             definitions = compute_all_definitions(definition_dict, base_dict)
 
-            logging.info(
-                "Found %i definitions in '%s'",
-                len(definitions),
-                yaml_path_relative_to_definitions,
+            logger.info(
+                f"Found {len(definitions)} definitions in {yaml_path_relative_to_definitions}",
             )
 
-            for definition in definitions:
+            for definition in rich.progress.track(definitions, transient=True):
                 module.generate(**definition)
-
-
-if __name__ == "__main__":
-    generate_kicad_objects()
